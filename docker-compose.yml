@@ -5,8 +5,11 @@ services:
     image: "konstatinkorobitsin/bitrix-php:v1.5"
     container_name: webserver
     restart: always
+    ports:
+      - 8808:80
     volumes:
-      - "./application/:/var/www/html/"
+      - "./application/:/var/www/"
+      - "./application/public/:/var/www/html"
       - "./configs/php/php.ini:/usr/local/etc/php/php.ini"
     depends_on:
       - mariaDb

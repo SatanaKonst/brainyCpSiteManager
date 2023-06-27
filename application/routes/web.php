@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BrainyApi;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -13,6 +14,12 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
+Route::namespace('\App\Http\Controllers')->group(function (){
+    Route::get('/', function () {
+        $brainy = new BrainyApi();
+//        $brainy->addDomain('f5DebugAdd.f5-test.ru');
+
+        return view('welcome');
+    });
 });
+
