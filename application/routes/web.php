@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\BrainyApi;
+use App\Http\Controllers\SiteCheckAuth;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,17 +16,28 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::namespace('\App\Http\Controllers')->group(function (){
+Route::namespace('\App\Http\Controllers')->group(function () {
     Route::get('/', function () {
         try {
             $brainy = new BrainyApi();
             $siteList = $brainy->getSiteList();
-        }catch (Throwable $exception){
+        } catch (Throwable $exception) {
             dump($exception->getMessage());
         }
-        return view('welcome',array(
-            'sites' => $siteList
+        return view('welcome', array(
+            'sites' => (!empty($siteList)) ? $siteList : []
         ));
     });
+
+    /**
+     * Проверить наличие авторизации на сайте
+     */
+    Route::get('/checkSiteAuth/{domain}', function ($domain) {
+        $result = false;
+        if (!empty($domain)) {
+            $result = SiteCheckAuth::checkSiteBasikAuth('//' . $domain);
+        }
+        return response()->json($result);
+    })->name('checkSiteAuth');
 });
 
