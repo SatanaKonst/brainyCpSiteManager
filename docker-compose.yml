@@ -1,0 +1,45 @@
+version: "3"
+
+services:
+  webserver:
+    image: "konstatinkorobitsin/bitrix-php:v1.5"
+    container_name: webserver
+    restart: always
+    volumes:
+      - "./application/:/var/www/html/"
+      - "./configs/php/php.ini:/usr/local/etc/php/php.ini"
+    depends_on:
+      - mariaDb
+    links:
+      - mariaDb
+
+  mariaDb:
+    image: mariadb:10.9.3
+    container_name: mariaDb
+    restart: always
+    environment:
+      MYSQL_DATABASE: "${DB}"
+      MYSQL_USER: "${DB_USER}"
+      MYSQL_PASSWORD: "${DB_PASS}"
+      MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
+    volumes:
+      - "db_volume:/var/lib/mysql"
+      - "./configs/mysql/slow-query.log:/var/log/mysql/mysql-slow.log"
+      - "./configs/mysql/my.cnf:/etc/mysql/conf.d/my.cnf"
+
+  pma:
+    image: phpmyadmin/phpmyadmin
+    container_name: pma
+    links:
+      - mariaDb
+    depends_on:
+      - mariaDb
+    environment:
+      PMA_HOST: mariaDb
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 1
+    restart: always
+
+
+volumes:
+  db_volume:
