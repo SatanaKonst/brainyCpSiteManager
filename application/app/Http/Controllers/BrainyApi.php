@@ -56,6 +56,7 @@ class BrainyApi extends Controller
         if (!empty($content)) {
             $content = json_decode($content);
             if (!empty($content->detail)) {
+                asort($content->detail);
                 return $content->detail;
             }
         }

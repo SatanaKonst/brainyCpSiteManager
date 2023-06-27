@@ -16,10 +16,15 @@ use Illuminate\Support\Facades\Route;
 
 Route::namespace('\App\Http\Controllers')->group(function (){
     Route::get('/', function () {
-        $brainy = new BrainyApi();
-//        $brainy->addDomain('f5DebugAdd.f5-test.ru');
-
-        return view('welcome');
+        try {
+            $brainy = new BrainyApi();
+            $siteList = $brainy->getSiteList();
+        }catch (Throwable $exception){
+            dump($exception->getMessage());
+        }
+        return view('welcome',array(
+            'sites' => $siteList
+        ));
     });
 });
 
