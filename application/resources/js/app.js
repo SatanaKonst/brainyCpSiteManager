@@ -44,23 +44,23 @@ document.addEventListener('DOMContentLoaded', function () {
               </svg>
         `;
         document.querySelectorAll(`#sitesList a`).forEach((item, index) => {
-            setTimeout(() => {
-                axios.get(
-                    `${checkerUrl}/${item.dataset.domain}`
-                )
-                    .then(function (response) {
-                        if (response.data === true) {
-                            item.innerHTML += lockIcon;
-                        } else {
-                            item.innerHTML += unlockIcon;
-                            item.classList.remove('bg-blue-700', 'dark:bg-blue-600')
-                            item.classList.add('bg-red-700', 'dark:bg-red-600')
-                        }
-                    })
-                    .catch(function (error) {
-                        console.error(error);
-                    });
-            }, (index+1) * 1000);
+            // setTimeout(() => {
+            //     axios.get(
+            //         `${checkerUrl}/${item.dataset.domain}`
+            //     )
+            //         .then(function (response) {
+            //             if (response.data === true) {
+            //                 item.innerHTML += lockIcon;
+            //             } else {
+            //                 item.innerHTML += unlockIcon;
+            //                 item.classList.remove('bg-blue-700', 'dark:bg-blue-600')
+            //                 item.classList.add('bg-red-700', 'dark:bg-red-600')
+            //             }
+            //         })
+            //         .catch(function (error) {
+            //             console.error(error);
+            //         });
+            // }, (index+1) * 1000);
         });
     }
 });

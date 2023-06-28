@@ -12,7 +12,7 @@ class SiteCheckAuth extends Controller
      * @return bool
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public static function checkSiteBasikAuth($url)
+    public static function hasSiteBasikAuth($url)
     {
         try {
             $client = new Client();
