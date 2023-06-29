@@ -218,4 +218,31 @@ class BrainyApi extends Controller
         }
         return false;
     }
+
+    /** Получить список запароленых дирректорий
+     * @return array
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function getPasswdDir(){
+        $response = $this->getClient()->post(
+            $this->panelUrl . self::API_POINT,
+            [
+                'form_params' => [
+                    'login' => $this->panelLogin,
+                    'pass' => $this->panelPass,
+                    'module' => 'apacserver',
+                    'subdo' => 'list_directory'
+                ]
+            ]
+        );
+        $content = trim($response->getBody()->getContents());
+        if (!empty($content)) {
+            $content = json_decode($content);
+            if (!empty($content->detail)) {
+                asort($content->detail);
+                return $content->detail;
+            }
+        }
+        return [];
+    }
 }

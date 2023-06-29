@@ -1,0 +1,7 @@
+#sitesList a[data-auth-status="Y"]:after{
+    content: "🔒";
+}
+
+#sitesList a[data-auth-status="N"]:after{
+    content: "👁";
+}

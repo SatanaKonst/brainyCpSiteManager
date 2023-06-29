@@ -29,14 +29,23 @@ Route::namespace('\App\Http\Controllers')->group(function () {
                 $brainy = new BrainyApi();
                 $siteList = $brainy->getSiteList();
                 $redis->saveSiteList($siteList);
+
+                /**
+                 * Получим список запароленых дирректорий
+                 */
+                $passwdDirs = $brainy->getPasswdDir();
+                dump($passwdDirs);
             }
 
-            $testDomain = $siteList[0];
-            $testAuthExist = SiteCheckAuth::hasSiteBasikAuth('http://' . $testDomain);
-            dump($testAuthExist);
-            $redis->saveAuthSitesStatus($testDomain, $testAuthExist);
+            if (!empty($siteList)) {
+                foreach ($siteList as $index => $item) {
+                    $siteList[$index] = array(
+                        'domain' => $item,
+                        'authStatus' => false
+                    );
+                }
+            }
 
-            dump($redis->getAuthSiteStatus($testDomain));
         } catch (Throwable $exception) {
             dump($exception->getMessage());
         }
@@ -44,16 +53,5 @@ Route::namespace('\App\Http\Controllers')->group(function () {
             'sites' => (!empty($siteList)) ? $siteList : []
         ));
     });
-
-    /**
-     * Проверить наличие авторизации на сайте
-     */
-    Route::get('/checkSiteAuth/{domain}', function ($domain) {
-        $result = false;
-        if (!empty($domain)) {
-            $result = SiteCheckAuth::hasSiteBasikAuth('//' . $domain);
-        }
-        return response()->json($result);
-    })->name('checkSiteAuth');
 });
 

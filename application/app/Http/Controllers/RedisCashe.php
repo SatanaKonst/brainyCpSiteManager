@@ -39,7 +39,9 @@ class RedisCashe extends Controller
      */
     public function getSiteList()
     {
-        return $this->redisInstance->lRange('siteList', 0, -1);
+        $siteList = $this->redisInstance->lRange('siteList', 0, -1);
+        asort($siteList);
+        return $siteList;
     }
 
     /** Сохранить статус авторизации к сайту
@@ -48,9 +50,9 @@ class RedisCashe extends Controller
      * @return bool|int|\Redis
      * @throws \RedisException
      */
-    public function saveAuthSitesStatus(string $domain, bool $status)
+    public function saveAuthSitesStatus(string $domain, bool $status = false)
     {
-        return $this->redisInstance->hSet('authSitesStatus', $domain, $status);
+        return $this->redisInstance->hSet('authSitesStatus', $domain, ($status === true) ? 'Y' : 'N');
     }
 
     /** Получить статус авторизации на конкретном сайте
@@ -58,8 +60,16 @@ class RedisCashe extends Controller
      * @return false|\Redis|string
      * @throws \RedisException
      */
-    public function getAuthSiteStatus(string $domain='')
+    public function getAuthSiteStatus(string $domain)
     {
+        return $this->redisInstance->hGet('authSitesStatus', $domain);
+    }
+
+    /** Получить статусы авторизации по всем сайтам
+     * @return array|false|\Redis
+     * @throws \RedisException
+     */
+    public function getAllAuthSiteStatus(){
         return $this->redisInstance->hGetAll('authSitesStatus');
     }
 

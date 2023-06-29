@@ -2,46 +2,17 @@ version: "3"
 
 services:
   webserver:
-    image: "konstatinkorobitsin/php-and-redis:1.0"
+    image: "konstatinkorobitsin/php-and-redis:1.1"
     container_name: webserver
     restart: always
     ports:
       - 8808:80
     volumes:
-      - "./application/:/var/www/"
+      - "./application/:/var/www"
       - "./application/public/:/var/www/html"
       - "./configs/php/php.ini:/usr/local/etc/php/php.ini"
-#    depends_on:
-#      - mariaDb
-#    links:
-#      - mariaDb
-
-#  mariaDb:
-#    image: mariadb:10.9.3
-#    container_name: mariaDb
-#    restart: always
-#    environment:
-#      MYSQL_DATABASE: "${DB}"
-#      MYSQL_USER: "${DB_USER}"
-#      MYSQL_PASSWORD: "${DB_PASS}"
-#      MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
-#    volumes:
-#      - "db_volume:/var/lib/mysql"
-#      - "./configs/mysql/slow-query.log:/var/log/mysql/mysql-slow.log"
-#      - "./configs/mysql/my.cnf:/etc/mysql/conf.d/my.cnf"
-#
-#  pma:
-#    image: phpmyadmin/phpmyadmin
-#    container_name: pma
-#    links:
-#      - mariaDb
-#    depends_on:
-#      - mariaDb
-#    environment:
-#      PMA_HOST: mariaDb
-#      PMA_PORT: 3306
-#      PMA_ARBITRARY: 1
-#    restart: always
+      - "./configs/apache/apache2.conf:/etc/apache2/apache2.conf"
+      - "./configs/apache/000-default.conf:/etc/apache2/sites-available/000-default.conf"
 
   redis:
     image: redis:7.0.11-alpine
