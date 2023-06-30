@@ -1,12 +1,14 @@
 version: "3"
 
 services:
-  webserver:
+  bitrix24brainycpApp:
     image: "konstatinkorobitsin/php-and-redis:1.1"
-    container_name: webserver
+    container_name: bitrix24brainycpApp
     restart: always
     ports:
       - 8808:80
+    depends_on:
+      - redis
     volumes:
       - "./application/:/var/www"
       - "./application/public/:/var/www/html"
