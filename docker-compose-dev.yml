@@ -5,6 +5,8 @@ services:
     image: "konstatinkorobitsin/php-and-redis:1.1"
     container_name: webserver
     restart: always
+    ports:
+      - 8808:80
     volumes:
       - "./application/:/var/www"
       - "./application/public/:/var/www/html"
