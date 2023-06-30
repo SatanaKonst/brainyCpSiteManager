@@ -31,4 +31,6 @@ volumes:
   redis:
 
 networks:
-  nginxNetwork:
+  default:
+    external: true
+    name: nginxNetwork
