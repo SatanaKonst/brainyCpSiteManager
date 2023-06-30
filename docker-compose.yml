@@ -7,8 +7,6 @@ services:
     restart: always
     depends_on:
       - redis
-    networks:
-      - nginxNetwork
     volumes:
       - "./application/:/var/www"
       - "./application/public/:/var/www/html"
@@ -21,8 +19,6 @@ services:
     container_name: redis
     restart: always
     command: redis-server --save 20 1 --loglevel warning
-    networks:
-      - nginxNetwork
     volumes:
       - redis:/data
 
