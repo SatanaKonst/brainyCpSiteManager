@@ -226,7 +226,8 @@ class BrainyApi extends Controller
      * @return array
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function getPasswdDir(){
+    public function getPasswdDir()
+    {
         $response = $this->getClient()->post(
             $this->panelUrl . self::API_POINT,
             [
@@ -241,9 +242,14 @@ class BrainyApi extends Controller
         $content = trim($response->getBody()->getContents());
         if (!empty($content)) {
             $content = json_decode($content);
+            $result = array();
             if (!empty($content->detail)) {
-                asort($content->detail);
-                return $content->detail;
+                foreach ($content->detail as $folder) {
+                    $domain = $folder[3];
+                    $result[$domain][] = $folder[0];
+                }
+                ksort($result);
+                return $result;
             }
         }
         return [];

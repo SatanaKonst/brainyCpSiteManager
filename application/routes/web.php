@@ -21,31 +21,35 @@ Route::namespace('\App\Http\Controllers')->group(function () {
     Route::get('/', function (Request $request) {
         try {
             $redis = new RedisCashe();
+            $brainy = new BrainyApi();
+
             if (!empty($request->get('updateSiteList')) && $request->get('updateSiteList') === 'Y') {
                 $redis->clerAllData();
             }
+
             $siteList = $redis->getSiteList();
             if (empty($siteList)) {
-                $brainy = new BrainyApi();
                 $siteList = $brainy->getSiteList();
                 $redis->saveSiteList($siteList);
+            }
 
-                /**
-                 * Получим список запароленых дирректорий
-                 */
+            /**
+             * Получим список запароленых дирректорий
+             */
+            $passwdDirs = $redis->getAllPasswdDirs();
+            if (empty($passwdDirs)) {
                 $passwdDirs = $brainy->getPasswdDir();
-                dump($passwdDirs);
+                $redis->savePasswdDir($passwdDirs);
             }
 
             if (!empty($siteList)) {
                 foreach ($siteList as $index => $item) {
                     $siteList[$index] = array(
                         'domain' => $item,
-                        'authStatus' => false
+                        'passDirs' => !empty($passwdDirs[$item]) ? $passwdDirs[$item] : []
                     );
                 }
             }
-
         } catch (Throwable $exception) {
             dump($exception->getMessage());
         }

@@ -12,10 +12,15 @@ class RedisCashe extends Controller
      */
     private $redisInstance = null;
 
+    private const TTL_TIME = 10800;
+
     public function __construct()
     {
 
         $this->redisInstance = Redis::connection();
+        if ($this->needUpdateCashe()) {
+            $this->clerAllData();
+        }
     }
 
     /** Сохранить список сайтов
@@ -69,7 +74,8 @@ class RedisCashe extends Controller
      * @return array|false|\Redis
      * @throws \RedisException
      */
-    public function getAllAuthSiteStatus(){
+    public function getAllAuthSiteStatus()
+    {
         return $this->redisInstance->hGetAll('authSitesStatus');
     }
 
@@ -81,6 +87,40 @@ class RedisCashe extends Controller
         return config('database.redis.options.prefix');
     }
 
+    /** Cохранить запароленые дирректории
+     * @param array $dirs
+     * @return void
+     * @throws \RedisException
+     */
+    public function savePasswdDir(array $dirs)
+    {
+        foreach ($dirs as $domain => $dir) {
+            $this->redisInstance->hSet('passwdDirs', $domain, json_encode($dir));
+        }
+    }
+
+    /** Вернуть запароленые дирректории
+     * @param $domain
+     * @return false|\Redis|string
+     * @throws \RedisException
+     */
+    public function getPasswdDirs($domain)
+    {
+        $result = $this->redisInstance->hGet('passwdDirs', $domain);
+
+        return json_decode($result, true);
+    }
+
+    public function getAllPasswdDirs()
+    {
+        $result = $this->redisInstance->hGetAll('passwdDirs');
+        if (!empty($result)) {
+            foreach ($result as $index => $item) {
+                $result[$index] = json_decode($item, true);
+            }
+        }
+        return $result;
+    }
 
     /** Очистить всю базу
      * @return bool|\Redis
@@ -88,7 +128,36 @@ class RedisCashe extends Controller
      */
     public function clerAllData()
     {
-        return $this->redisInstance->flushAll();
+        $result = $this->redisInstance->flushAll();
+        $this->setLastUpdateTime();
+        return $result;
+    }
+
+    private function setLastUpdateTime()
+    {
+        $this->redisInstance->set('lastUpdateTime', time());
+    }
+
+    /** Получить время последнего обновления кеша
+     * @return false|mixed|\Redis|string
+     * @throws \RedisException
+     */
+    private function getLastUpdateTime()
+    {
+        return $this->redisInstance->get('lastUpdateTime');
+    }
+
+    /** Проверка нужно ли принудительное обновление кеша
+     * @return bool
+     */
+    private function needUpdateCashe()
+    {
+        $lastUpdateTime = $this->getLastUpdateTime();
+        if (empty($lastUpdateTime)) {
+            return true;
+        }
+        $currentTime = time();
+        return ($currentTime - $lastUpdateTime) > self::TTL_TIME;
     }
 
 }
