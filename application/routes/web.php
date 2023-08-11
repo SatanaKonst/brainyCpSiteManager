@@ -66,11 +66,11 @@ Route::namespace('\App\Http\Controllers')->group(function () {
         try {
             $brainy = new BrainyApi();
             $fullDbName = $brainy->addSite($domain, $dbName, $dbPass, $setDirPassword);
-        }catch (Throwable $exception){
+        } catch (Throwable $exception) {
             dump($exception->getMessage());
             die();
         }
-        return redirect(route('home', ['addSite=Y', 'fulldbname=' . $fullDbName],'domain='.$domain));
+        return redirect(route('home', ['addSite=Y', 'fulldbname=' . $fullDbName, 'domain=' . $domain, 'updateSiteList=Y']));
     })->name('addSite');
 });
 
