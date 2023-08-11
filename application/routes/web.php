@@ -56,6 +56,21 @@ Route::namespace('\App\Http\Controllers')->group(function () {
         return view('welcome', array(
             'sites' => (!empty($siteList)) ? $siteList : []
         ));
-    });
+    })->name('home');
+
+    Route::post('/addSite', function (Request $request) {
+        $domain = $request->get('domain');
+        $dbName = $request->get('dbName');
+        $dbPass = $request->get('dbPass');
+        $setDirPassword = $request->get('setDirPassword') === 'Y';
+        try {
+            $brainy = new BrainyApi();
+            $fullDbName = $brainy->addSite($domain, $dbName, $dbPass, $setDirPassword);
+        }catch (Throwable $exception){
+            dump($exception->getMessage());
+            die();
+        }
+        return redirect(route('home', ['addSite=Y', 'fulldbname=' . $fullDbName],'domain='.$domain));
+    })->name('addSite');
 });
 

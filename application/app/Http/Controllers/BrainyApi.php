@@ -93,6 +93,75 @@ class BrainyApi extends Controller
         return [];
     }
 
+    /** TODO:: Проблема с установкой. Пишет, что поставлено, но пароля нет
+     * @param $directory
+     * @param $password /home/UserNamePanel/sites/domain
+     * @return void
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function setDirPassword($directory = '/', $password = '')
+    {
+        if (empty($password)) {
+            $password = $_ENV['DEFAULT_DIR_PASSWORD'];
+        }
+        $response = $this->getClient()->post(
+            $this->panelUrl . self::API_POINT,
+            [
+                'form_params' => [
+                    'login' => $this->panelLogin,
+                    'pass' => $this->panelPass,
+                    'module' => 'apacserver',
+                    'subdo' => 'set_password',
+                    'directory' => $directory,
+                    'password' => $password,
+                ]
+            ]
+        );
+        $content = trim($response->getBody()->getContents());
+        if (!empty($content)) {
+            $content = json_decode($content);
+            dump($content);
+            if ($content->code === 0) {
+                return true;
+            } else {
+                throw new Exception('Error set password ' . $content->message);
+            }
+        }
+        return false;
+    }
+
+    /** Удаляет пароль с директории
+     * @param $directory
+     * @return bool
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function deleteDirPassword($directory)
+    {
+
+        $response = $this->getClient()->post(
+            $this->panelUrl . self::API_POINT,
+            [
+                'form_params' => [
+                    'login' => $this->panelLogin,
+                    'pass' => $this->panelPass,
+                    'module' => 'apacserver',
+                    'subdo' => 'delete_password',
+                    'directory' => $directory,
+                ]
+            ]
+        );
+        $content = trim($response->getBody()->getContents());
+        if (!empty($content)) {
+            $content = json_decode($content);
+            if ($content->code === 0) {
+                return true;
+            } else {
+                throw new Exception('Error delete password ' . $content->message);
+            }
+        }
+        return false;
+    }
+
     /** Добавить базу
      * @param string $name
      * @param string $pass
@@ -253,5 +322,38 @@ class BrainyApi extends Controller
             }
         }
         return [];
+    }
+
+    /** Добавляет сайт
+     * @param $domain
+     * @param $dbPass
+     * @return string
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function addSite($domain, $dbName, $dbPass, $setDirPassword = false)
+    {
+        if (empty($_ENV['PANEL_LOGIN'])) {
+            throw new \Exception('Пустой логин панели');
+        }
+
+        //Добавляем сайт
+        if ($this->addDomain($domain)) {
+            if ($setDirPassword) {
+                //TODO:: ОТключено до ответа на форуме или обновления панелиы
+//                $setPassResult = $this->setDirPassword(
+//                    '/home/' . $_ENV['PANEL_LOGIN'] . '/sites/' . $domain . '/'
+//                );
+//                if ($setPassResult === false) {
+//                    throw new \Exception('Ошибка установки пароля на сайт');
+//                }
+            }
+
+            //Добавляем базу
+            if ($this->addDatabase($dbName, $dbPass)) {
+                return $_ENV['PANEL_LOGIN'] . '_' . $dbName;
+            }
+            throw new \Exception('Ошибка добавления базы');
+        }
+        throw new \Exception('Ошибка добавления домена');
     }
 }
