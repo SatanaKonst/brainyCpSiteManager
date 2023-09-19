@@ -20,6 +20,8 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         //
-        \Illuminate\Support\Facades\URL::forceScheme('https');
+        if(env('APP_SCHEME', 'http')==='https'){
+            \Illuminate\Support\Facades\URL::forceScheme('https');
+        }
     }
 }
