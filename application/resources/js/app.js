@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', function () {
             let sites = document.querySelectorAll(`#sitesList a:not([href*="${value}"])`);
             if (sites.length > 0) {
                 sites.forEach((item) => {
-                    item.hidden = true;
+                    item.closest('div').hidden = true;
                 });
             } else {
                 hideAllSites();
@@ -17,13 +17,13 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     function showAllSites() {
-        document.querySelectorAll(`#sitesList a`).forEach((item) => {
+        document.querySelectorAll(`#sitesList div`).forEach((item) => {
             item.hidden = false;
         });
     }
 
     function hideAllSites() {
-        document.querySelectorAll(`#sitesList a`).forEach((item) => {
+        document.querySelectorAll(`#sitesList div`).forEach((item) => {
             item.hidden = true;
         });
     }

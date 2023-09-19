@@ -77,7 +77,7 @@
                                     d="M18 5H0v11a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5Zm-7.258-2L9.092.8a2.009 2.009 0 0 0-1.6-.8H2.049a2 2 0 0 0-2 2v1h10.693Z"/>
                             </svg>
                         </button>
-                    @endif
+
                     <!-- Main modal -->
                     <div id="passwdDir{{$index}}" tabindex="-1" aria-hidden="true"
                          class="fixed top-0 left-0 right-0 z-50 hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full">
@@ -115,6 +115,7 @@
                             </div>
                         </div>
                     </div>
+                    @endif
                 @endif
             </div>
         @endforeach
@@ -167,10 +168,10 @@
                                    placeholder="newSite.f5-test.ru" required>
                         </div>
                         <div class="mb-6">
-                            <label for="domain"
+                            <label for="dbName"
                                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Имя базы
                                 данные</label>
-                            <input type="text" id="domain" name="dbName" maxlength="7"
+                            <input type="text" id="dbName" name="dbName" maxlength="7"
                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                    placeholder="myDB" required>
                         </div>
@@ -178,6 +179,7 @@
                             <label for="dbPass" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Пароль
                                 для базы</label>
                             <input type="password" id="dbPass" name="dbPass"
+                                   autocomplete="no"
                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                    placeholder="•••••••••" required>
                         </div>
