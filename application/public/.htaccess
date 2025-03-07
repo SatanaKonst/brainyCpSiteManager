@@ -5,6 +5,10 @@
 
     RewriteEngine On
 
+    <IfFile '/var/www/html/allowedips.txt'>
+        RewriteCond ${allowedips:%{REMOTE_ADDR}|DENY} =DENY
+        RewriteRule ^ - [F]
+    </IfFile>
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]

@@ -16,7 +16,6 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
-
 Route::namespace('\App\Http\Controllers')->group(function () {
     Route::get('/', function (Request $request) {
         try {
