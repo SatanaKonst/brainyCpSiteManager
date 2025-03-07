@@ -20,7 +20,7 @@ class BrainyApi extends Controller
 
     public function __construct()
     {
-        if (empty($_ENV['PANEL_URL']) || empty($_ENV['PANEL_LOGIN'] || empty($_ENV['PANEL_PASS']))) {
+        if ( empty($_ENV['PANEL_URL']) || empty($_ENV['PANEL_LOGIN'] || empty($_ENV['PANEL_PASS'])) ) {
             throw new Exception('Error get connection data');
         }
         $this->panelUrl = $_ENV['PANEL_URL'];
@@ -42,7 +42,49 @@ class BrainyApi extends Controller
      * @return void
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function getSiteList()
+    public function getSiteList($user = '')
+    {
+        $params = [
+            'login' => $this->panelLogin,
+            'pass' => $this->panelPass,
+            'module' => 'apacserver',
+            'subdo' => 'list_http',
+
+        ];
+        if ( !empty($user) ) {
+            $params['user_edit'] = $user;
+        }
+        $response = $this->getClient()->post(
+            $this->panelUrl . self::API_POINT,
+            [
+                'form_params' => $params
+            ]
+        );
+        $content = trim($response->getBody()->getContents());
+        if ( !empty($content) ) {
+            $content = json_decode($content);
+            if ( !empty($content->detail) ) {
+                asort($content->detail);
+                return $content->detail;
+            }
+        }
+        return [];
+    }
+
+    public function getAllSites()
+    {
+        $hostAacc = $this->getHostAccounts();
+        $sites = [];
+        foreach ($hostAacc as $host) {
+            $tmp = $this->getSiteList($host);
+            if ( !empty($tmp) ) {
+                $sites[] = $tmp;
+            }
+        }
+        return $sites;
+    }
+
+    public function getHostAccounts()
     {
         $response = $this->getClient()->post(
             $this->panelUrl . self::API_POINT,
@@ -50,17 +92,16 @@ class BrainyApi extends Controller
                 'form_params' => [
                     'login' => $this->panelLogin,
                     'pass' => $this->panelPass,
-                    'module' => 'apacserver',
-                    'subdo' => 'list_http'
+                    'module' => 'hostacc',
+                    'subdo' => 'listuseracc'
                 ]
             ]
         );
         $content = trim($response->getBody()->getContents());
-        if (!empty($content)) {
+        if ( !empty($content) ) {
             $content = json_decode($content);
-            if (!empty($content->detail)) {
-                asort($content->detail);
-                return $content->detail;
+            if ( !empty($content->data) ) {
+                return $content->data;
             }
         }
         return [];
@@ -84,9 +125,9 @@ class BrainyApi extends Controller
             ]
         );
         $content = trim($response->getBody()->getContents());
-        if (!empty($content)) {
+        if ( !empty($content) ) {
             $content = json_decode($content);
-            if (!empty($content->array)) {
+            if ( !empty($content->array) ) {
                 return $content->array;
             }
         }
@@ -101,7 +142,7 @@ class BrainyApi extends Controller
      */
     public function setDirPassword($directory = '/', $password = '')
     {
-        if (empty($password)) {
+        if ( empty($password) ) {
             $password = $_ENV['DEFAULT_DIR_PASSWORD'];
         }
         $response = $this->getClient()->post(
@@ -118,10 +159,9 @@ class BrainyApi extends Controller
             ]
         );
         $content = trim($response->getBody()->getContents());
-        if (!empty($content)) {
+        if ( !empty($content) ) {
             $content = json_decode($content);
-            dump($content);
-            if ($content->code === 0) {
+            if ( $content->code === 0 ) {
                 return true;
             } else {
                 throw new Exception('Error set password ' . $content->message);
@@ -137,7 +177,6 @@ class BrainyApi extends Controller
      */
     public function deleteDirPassword($directory)
     {
-
         $response = $this->getClient()->post(
             $this->panelUrl . self::API_POINT,
             [
@@ -151,9 +190,9 @@ class BrainyApi extends Controller
             ]
         );
         $content = trim($response->getBody()->getContents());
-        if (!empty($content)) {
+        if ( !empty($content) ) {
             $content = json_decode($content);
-            if ($content->code === 0) {
+            if ( $content->code === 0 ) {
                 return true;
             } else {
                 throw new Exception('Error delete password ' . $content->message);
@@ -170,7 +209,7 @@ class BrainyApi extends Controller
      */
     public function addDatabase(string $name, string $pass)
     {
-        if (mb_strlen($name) > 7) {
+        if ( mb_strlen($name) > 7 ) {
             throw new Exception('Value must not exceed 7 characters');
         }
         /*
@@ -189,9 +228,9 @@ class BrainyApi extends Controller
             ]
         );
         $content = trim($response->getBody()->getContents());
-        if (!empty($content)) {
+        if ( !empty($content) ) {
             $content = json_decode($content);
-            if ($content->code === 0) {
+            if ( $content->code === 0 ) {
                 $dbName = $content->database;
             } else {
                 throw new Exception('Error add db ' . $content->message);
@@ -216,9 +255,9 @@ class BrainyApi extends Controller
         );
 
         $content = trim($response->getBody()->getContents());
-        if (!empty($content)) {
+        if ( !empty($content) ) {
             $content = json_decode($content);
-            if (!empty($content->code === 0)) {
+            if ( !empty($content->code === 0) ) {
                 $dbUser = $content->dbuser;
             } else {
                 throw new Exception('Error add user db ' . $content->message);
@@ -244,9 +283,9 @@ class BrainyApi extends Controller
         );
 
         $content = trim($response->getBody()->getContents());
-        if (!empty($content)) {
+        if ( !empty($content) ) {
             $content = json_decode($content);
-            if ($content->code === 0) {
+            if ( $content->code === 0 ) {
                 return true;
             }
         }
@@ -263,7 +302,7 @@ class BrainyApi extends Controller
     public function addDomain(string $domain, bool $addWwwAlias = true, string $phpVersion = 'php81w')
     {
         $aliases = '';
-        if ($addWwwAlias === true) {
+        if ( $addWwwAlias === true ) {
             $aliases = 'www.' . $domain;
         }
         $response = $this->getClient()->post(
@@ -282,9 +321,9 @@ class BrainyApi extends Controller
             ]
         );
         $content = trim($response->getBody()->getContents());
-        if (!empty($content)) {
+        if ( !empty($content) ) {
             $content = json_decode($content);
-            if ($content->code === 201) {
+            if ( $content->code === 201 ) {
                 return true;
             }
         }
@@ -295,24 +334,28 @@ class BrainyApi extends Controller
      * @return array
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function getPasswdDir()
+    public function getPasswdDir($user = '')
     {
+        $param = [
+            'login' => $this->panelLogin,
+            'pass' => $this->panelPass,
+            'module' => 'apacserver',
+            'subdo' => 'list_directory'
+        ];
+        if ( !empty($user) ) {
+            $param['user_edit'] = $user;
+        }
         $response = $this->getClient()->post(
             $this->panelUrl . self::API_POINT,
             [
-                'form_params' => [
-                    'login' => $this->panelLogin,
-                    'pass' => $this->panelPass,
-                    'module' => 'apacserver',
-                    'subdo' => 'list_directory'
-                ]
+                'form_params' => $param
             ]
         );
         $content = trim($response->getBody()->getContents());
-        if (!empty($content)) {
+        if ( !empty($content) ) {
             $content = json_decode($content);
             $result = array();
-            if (!empty($content->detail)) {
+            if ( !empty($content->detail) ) {
                 foreach ($content->detail as $folder) {
                     $domain = $folder[3];
                     $result[$domain][] = $folder[0];
@@ -332,13 +375,13 @@ class BrainyApi extends Controller
      */
     public function addSite($domain, $dbName, $dbPass, $setDirPassword = false)
     {
-        if (empty($_ENV['PANEL_LOGIN'])) {
+        if ( empty($_ENV['PANEL_LOGIN']) ) {
             throw new \Exception('Пустой логин панели');
         }
 
         //Добавляем сайт
-        if ($this->addDomain($domain)) {
-            if ($setDirPassword) {
+        if ( $this->addDomain($domain) ) {
+            if ( $setDirPassword ) {
                 //TODO:: ОТключено до ответа на форуме или обновления панелиы
 //                $setPassResult = $this->setDirPassword(
 //                    '/home/' . $_ENV['PANEL_LOGIN'] . '/sites/' . $domain . '/'
@@ -349,7 +392,7 @@ class BrainyApi extends Controller
             }
 
             //Добавляем базу
-            if ($this->addDatabase($dbName, $dbPass)) {
+            if ( $this->addDatabase($dbName, $dbPass) ) {
                 return $_ENV['PANEL_LOGIN'] . '_' . $dbName;
             }
             throw new \Exception('Ошибка добавления базы');

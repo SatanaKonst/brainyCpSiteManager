@@ -28,12 +28,11 @@ class RedisCashe extends Controller
      * @return void
      * @throws \RedisException
      */
-    public function saveSiteList(array $siteList)
+    public function saveSiteList($user, array $siteList)
     {
         foreach ($siteList as $site) {
             if (empty($this->redisInstance->get($site))) {
-
-                $this->redisInstance->lPush('siteList', $site);
+                $this->redisInstance->lPush($user.'_siteList', $site);
             }
         }
     }
@@ -42,9 +41,9 @@ class RedisCashe extends Controller
      * @return array|\Redis
      * @throws \RedisException
      */
-    public function getSiteList()
+    public function getSiteList($user)
     {
-        $siteList = $this->redisInstance->lRange('siteList', 0, -1);
+        $siteList = $this->redisInstance->lRange($user.'_siteList', 0, -1);
         asort($siteList);
         return $siteList;
     }
@@ -92,10 +91,10 @@ class RedisCashe extends Controller
      * @return void
      * @throws \RedisException
      */
-    public function savePasswdDir(array $dirs)
+    public function savePasswdDir($user,array $dirs)
     {
         foreach ($dirs as $domain => $dir) {
-            $this->redisInstance->hSet('passwdDirs', $domain, json_encode($dir));
+            $this->redisInstance->hSet($user.'_passwdDirs', $domain, json_encode($dir));
         }
     }
 
@@ -111,9 +110,9 @@ class RedisCashe extends Controller
         return json_decode($result, true);
     }
 
-    public function getAllPasswdDirs()
+    public function getAllPasswdDirs($user)
     {
-        $result = $this->redisInstance->hGetAll('passwdDirs');
+        $result = $this->redisInstance->hGetAll($user.'_passwdDirs');
         if (!empty($result)) {
             foreach ($result as $index => $item) {
                 $result[$index] = json_decode($item, true);

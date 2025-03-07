@@ -22,31 +22,32 @@ Route::namespace('\App\Http\Controllers')->group(function () {
         try {
             $redis = new RedisCashe();
             $brainy = new BrainyApi();
+            $currentUser  = !empty($request->get('currentUser')) ? $request->get('currentUser') : $_ENV['PANEL_LOGIN'];
 
-            if (!empty($request->get('updateSiteList')) && $request->get('updateSiteList') === 'Y') {
+            if ( !empty($request->get('updateSiteList')) && $request->get('updateSiteList') === 'Y' ) {
                 $redis->clerAllData();
             }
 
-            $siteList = $redis->getSiteList();
-            if (empty($siteList)) {
-                $siteList = $brainy->getSiteList();
-                $redis->saveSiteList($siteList);
+            $siteList = $redis->getSiteList($currentUser);
+            if ( empty($siteList) ) {
+                $siteList = $brainy->getSiteList($currentUser);
+                $redis->saveSiteList($currentUser,$siteList);
             }
 
             /**
              * Получим список запароленых дирректорий
              */
-            $passwdDirs = $redis->getAllPasswdDirs();
-            if (empty($passwdDirs)) {
-                $passwdDirs = $brainy->getPasswdDir();
-                $redis->savePasswdDir($passwdDirs);
+            $passwdDirs = $redis->getAllPasswdDirs($currentUser);
+            if ( empty($passwdDirs) ) {
+                $passwdDirs = $brainy->getPasswdDir($currentUser);
+                $redis->savePasswdDir($currentUser,$passwdDirs);
             }
 
-            if (!empty($siteList)) {
+            if ( !empty($siteList) ) {
                 foreach ($siteList as $index => $item) {
                     $siteList[$index] = array(
                         'domain' => $item,
-                        'passDirs' => !empty($passwdDirs[$item]) ? $passwdDirs[$item] : []
+                        'passDirs' => !empty($passwdDirs[$item]) ? $passwdDirs[$item] : [],
                     );
                 }
             }
@@ -54,7 +55,9 @@ Route::namespace('\App\Http\Controllers')->group(function () {
             dump($exception->getMessage());
         }
         return view('welcome', array(
-            'sites' => (!empty($siteList)) ? $siteList : []
+            'sites' => (!empty($siteList)) ? $siteList : [],
+            'hostAcc' => $brainy->getHostAccounts(),
+            'currentUser' => $currentUser,
         ));
     })->name('home');
 
@@ -70,7 +73,9 @@ Route::namespace('\App\Http\Controllers')->group(function () {
             dump($exception->getMessage());
             die();
         }
-        return redirect(route('home', ['addSite=Y', 'fulldbname=' . $fullDbName, 'domain=' . $domain, 'updateSiteList=Y']));
+        return redirect(
+            route('home', ['addSite=Y', 'fulldbname=' . $fullDbName, 'domain=' . $domain, 'updateSiteList=Y'])
+        );
     })->name('addSite');
 });
 
