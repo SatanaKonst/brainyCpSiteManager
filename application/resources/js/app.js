@@ -23,6 +23,14 @@ document.addEventListener('DOMContentLoaded', function () {
         window.location = url.toString();
     });
 
+    document.getElementById('exportDomains').addEventListener('click', function (){
+        let domains=[];
+        document.querySelectorAll('a[data-domain]').forEach((domain)=>{
+            domains.push(domain.getAttribute('href'))
+        })
+        navigator.clipboard.writeText(domains.join("\n"));
+        alert("Список скопирован в буфер обмена")
+    })
     function showAllSites() {
         document.querySelectorAll(`#sitesList div`).forEach((item) => {
             item.hidden = false;

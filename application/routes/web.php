@@ -21,16 +21,24 @@ Route::namespace('\App\Http\Controllers')->group(function () {
         try {
             $redis = new RedisCashe();
             $brainy = new BrainyApi();
-            $currentUser  = !empty($request->get('currentUser')) ? $request->get('currentUser') : $_ENV['PANEL_LOGIN'];
+            $currentUser = !empty($request->get('currentUser')) ? $request->get('currentUser') : $_ENV['PANEL_LOGIN'];
 
             if ( !empty($request->get('updateSiteList')) && $request->get('updateSiteList') === 'Y' ) {
                 $redis->clerAllData();
             }
+            $hostAccs = $brainy->getHostAccounts();
 
             $siteList = $redis->getSiteList($currentUser);
             if ( empty($siteList) ) {
-                $siteList = $brainy->getSiteList($currentUser);
-                $redis->saveSiteList($currentUser,$siteList);
+                if ( $currentUser === 'all' ) {
+                    foreach ($hostAccs as $hostAcc) {
+                        $siteList = array_merge($siteList, $brainy->getSiteList($hostAcc));
+                    }
+                } else {
+                    $siteList = $brainy->getSiteList($currentUser);
+                }
+
+                $redis->saveSiteList($currentUser, $siteList);
             }
 
             /**
@@ -38,8 +46,15 @@ Route::namespace('\App\Http\Controllers')->group(function () {
              */
             $passwdDirs = $redis->getAllPasswdDirs($currentUser);
             if ( empty($passwdDirs) ) {
-                $passwdDirs = $brainy->getPasswdDir($currentUser);
-                $redis->savePasswdDir($currentUser,$passwdDirs);
+                if ( $currentUser === 'all' ) {
+                    foreach ($hostAccs as $hostAcc) {
+                        $passwdDirs = array_merge($passwdDirs, $brainy->getPasswdDir($hostAcc));
+                    }
+                } else {
+                    $passwdDirs = $brainy->getPasswdDir($currentUser);
+                }
+
+                $redis->savePasswdDir($currentUser, $passwdDirs);
             }
 
             if ( !empty($siteList) ) {
