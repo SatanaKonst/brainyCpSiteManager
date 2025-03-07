@@ -3,3 +3,5 @@ DB_USER=""
 DB_PASS=""
 ROOT_DB_PASS=""
 
+CONTAINER_NETWORK_NAME=nginxNetwork
+

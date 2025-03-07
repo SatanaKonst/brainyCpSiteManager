@@ -29,4 +29,4 @@ volumes:
 networks:
   default:
     external: true
-    name: nginxNetwork
+    name:  ${CONTAINER_NETWORK_NAME}
